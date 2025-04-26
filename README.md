@@ -9,7 +9,7 @@ It would be better to have a solution when you can just say which view you want 
 You just write:
 
 ```swift
-coordinator.push(.profile)
+controller.push(ProfileView())
 ```
 
 And `NavigationView` pushes the `ProfileView` on to the stack. All you need is to add case profile to `enum Screen` and add `ProfileView()` into `ScreenView`. This way `NavigationCoordinator` will be able to push `ProfileView` onto the navigation stack without any more efforts.
@@ -21,14 +21,11 @@ import SwiftUI
 
 @main
 struct NavigationApp: App {
-    @StateObject var coordinator = NavigationCoordinator(rootScreen: .home)
-
+    @StateObject var controller = NavigationController(root: HomeView())
+    
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                coordinator.rootView
-            }
-            .environmentObject(coordinator)
+            controller.view
         }
     }
 }
@@ -40,14 +37,16 @@ This is how `HomeView` looks like:
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject private var coordinator: NavigationCoordinator
+    @EnvironmentObject var controller: NavigationController
+
     var body: some View {
         VStack(spacing: 20) {
+            Text("Home View").font(.largeTitle)
             Button("Go to Profile") {
-                coordinator.push(.profile)
+                controller.push(ProfileView())
             }
             Button("Go to Settings") {
-                coordinator.push(.settings)
+                controller.push(SettingsView())
             }
         }
         .navigationTitle("Home")
@@ -59,12 +58,8 @@ struct HomeView: View {
 
 ![NavigationController](https://github.com/user-attachments/assets/9fe3ce38-7aa2-4204-9ff5-8afa6c3ea923)
 
-## NavigationController alternative
+## Warning
 
-Or you can take my [alternative version](https://github.com/0xMarK/NavigationController) which enables you to specify any `View` to navigate to inline:
+This solution relies on `AnyView` which is dangerous. Apple Engineers don’t recommend to use `AnyView` because it has performance issues and may have other unexpected issues. Use `NavigationController` variant cautious.
 
-```swift
-controller.push(ProfileView())
-```
-
-But this version relies on `AnyView` which is dangerous. Apple Engineers don’t recommend to use `AnyView` because it has performance issues and may have other unexpected issues. Use `NavigationController` variant cautious.
+More reliable variant is available at https://github.com/0xMarK/NavigationCoordinator
